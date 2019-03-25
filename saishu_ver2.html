@@ -1,0 +1,153 @@
+<!DOCTYPE html> 
+<html lang="ja"> 
+<head>
+<meta charset="utf-8">
+<script src="../js/jquery-3.3.1.min.js"></script>
+<!--
+TODO:
+グラフプラグインを使おうとして失敗
+<script src="https://unpkg.com/chart.js@2.4.0/dist/Chart.min.js"></script>
+<script src="https://unpkg.com/shaf-chart@1.1.6/index.js"></script>
+
+CSVを読み込んで<tr>に中の表をappendで適応させようとした。
+<input type=file> からCSV内の表を読み込めず断念。
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.8.9/jquery.csv.min.js"></script>
+-->
+
+<script>
+$(function(){
+    //TODO: CSVを適用ボタン
+    $('#appendCSV').click(function(){
+        $("#row1").empty().append(
+            '<th>CSV A</th><th>CSV B</th><th>CSV C</th>'
+        );
+        $("#row2").empty().append(
+            '<td><input type="text" name="Data0" size="3" value="50"></td>'+
+            '<td><input type="text" name="Data1" size="3" value="40"></td>'+
+            '<td><input type="text" name="Data2" size="3" value="70"></td>'
+        );
+    });
+
+    //計算ボタン
+    $('#calc').click(function(e){
+        var array = [];
+        var obj = {};
+
+        $("tr").each(function(i){
+            obj = new Object();
+            $(this).children().each(function(j){
+                var input = $('input:text[name="Data'+ j +'"]').val();
+                //数値だったらオブジェクトにする
+                if($.isNumeric(input)){
+                    obj[j] = input;
+                }
+            });
+
+            //空の配列かどうか
+            if(!$.isEmptyObject(obj)){
+                array.push(obj);
+            }
+        });
+        //console.log(array[1]);
+
+        //空は自動で省いて計算される
+        try{
+            var lengthCnt = Object.keys(array[1]).length;
+            var sum=0;
+            var ave=0;
+            var squareSum=0;
+            var variance=0;
+            var SD=0;
+
+            for(var i=0; i<lengthCnt; i++){
+                sum = sum + parseFloat(array[1][i]);
+                squareSum = squareSum + Math.pow(parseFloat(array[1][i]),2);
+                //console.log(sum+'/'+i);
+            }
+            ave = sum/lengthCnt;
+            variance = squareSum/lengthCnt - Math.pow(parseFloat(ave),2);
+            SD = Math.sqrt(parseFloat(variance));
+
+            /*
+            console.log('合計：'+sum);
+            console.log('平均：'+ave);
+            console.log('分散：'+variance);
+            console.log('標準偏差：'+SD);
+            */
+            $('#sum').empty().append('合計：'+sum);
+            $('#ave').empty().append('平均：'+ave);
+            $('#variance').empty().append('標本分散：'+variance);
+            $('#sd').empty().append('標準偏差：'+SD);
+
+        }catch(e){
+            alert("数値を入力してください。");
+            console.log(e);
+        };
+    });
+
+    //表のリセットボタン
+    //TODO: もっと行数が少なくて済むようにしたい。
+    $('#reset').click(function(){
+        $("#row1").empty().append(
+            '<th>A</th><th>B</th><th>C</th><th>D</th><th>E</th>'+
+            '<th>F</th><th>G</th><th>H</th><th>I</th><th>J</th>'
+        );
+        $("#row2").empty().append(
+            '<td><input type="text" name="Data0" size="3" value=""></td>'+
+            '<td><input type="text" name="Data1" size="3" value=""></td>'+
+            '<td><input type="text" name="Data2" size="3" value=""></td>'+
+            '<td><input type="text" name="Data3" size="3" value=""></td>'+
+            '<td><input type="text" name="Data4" size="3" value=""></td>'+
+            '<td><input type="text" name="Data5" size="3" value=""></td>'+
+            '<td><input type="text" name="Data6" size="3" value=""></td>'+
+            '<td><input type="text" name="Data7" size="3" value=""></td>'+
+            '<td><input type="text" name="Data8" size="3" value=""></td>'+
+            '<td><input type="text" name="Data9" size="3" value=""></td>'
+        );
+    });
+});
+</script>
+</head>
+<body>
+<h1>簡易統計処理ツール</h1>
+
+<input type="file" id="readFile">
+<input type="button" id="appendCSV" value="CSVを適用">
+<br>
+
+<table border="1" cellpadding="1" cellspacing="0">
+    <tr id="row1">
+        <th>A</th><th>B</th><th>C</th><th>D</th><th>E</th>
+        <th>F</th><th>G</th><th>H</th><th>I</th><th>J</th>
+    </tr>
+    <tr id="row2">
+        <td><input type="text" name="Data0" size="3" value=""></td>
+        <td><input type="text" name="Data1" size="3" value=""></td>
+        <td><input type="text" name="Data2" size="3" value=""></td>
+        <td><input type="text" name="Data3" size="3" value=""></td>
+        <td><input type="text" name="Data4" size="3" value=""></td>
+        <td><input type="text" name="Data5" size="3" value=""></td>
+        <td><input type="text" name="Data6" size="3" value=""></td>
+        <td><input type="text" name="Data7" size="3" value=""></td>
+        <td><input type="text" name="Data8" size="3" value=""></td>
+        <td><input type="text" name="Data9" size="3" value=""></td>
+    </tr>
+</table>
+<br>
+<input type="button" id="calc" value="計算">
+<input type="button" id="reset" value="表をリセット">
+
+<p id="sum">合計：</p>
+<p id="ave">平均：</p>
+<p id="variance">標本分散：</p>
+<p id="sd">標準偏差：</p>
+
+<hr>
+<p>ご注意：<br>
+「ファイルを選択」でファイルを参照しても何も起こりません。<br>
+「CSVを適用」を押すと表がデフォルトの数値に置き換えられます。<br>
+CSVファイルは残念ながら読み込めません。<br>
+リセットボタンで表を初期化できます。
+</p>
+</body>
+</html>
